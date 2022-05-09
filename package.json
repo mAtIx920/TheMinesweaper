@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "start": "http-server",
+    "format": "prettier --write"
+  },
+  "dependencies": {
+    "http-server": "^14.1.0",
+    "prettier": "^2.6.2"
+  }
+}
