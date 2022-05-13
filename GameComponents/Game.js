@@ -1,5 +1,7 @@
 import { Cell } from "./Cell.js";
-import { UI } from "./UI.js"
+import { UI } from "./UI.js";
+import { Counter } from './Counter.js';
+import { timer } from "./Timer.js";
 
 class Game extends UI {
   #config = {
@@ -24,9 +26,11 @@ class Game extends UI {
   #numberOfMines = null;
   #gameCells = [];
   #boardElement = null;
+  #counter = new Counter();
 
   initializeGame = () => {
     this.handleElements();
+    this.#counter.init();
     this.newGame();
   }
 
@@ -44,13 +48,14 @@ class Game extends UI {
     this.#numberOfRows = rows;
     this.#numbersOfCols = cols;
     this.#numberOfMines = mines;
+    this.#counter.setValue(mines);
 
     this.setStyles();
     this.generateCells();
     this.renderBoard();
+    this.createMines();
 
-    // this.#cellElements = this.getElements(this.uiSelectors.cell)
-    // this.addCellsEvents();
+    timer.startTimer();
   }
 
   setStyles = () => {
@@ -64,6 +69,20 @@ class Game extends UI {
       for(let col = 0; col < this.#numbersOfCols; col++) {
         this.#gameCells[row].push(new Cell(row, col))
       }
+    }
+  }
+
+  createMines = () => {
+    let minesNumber = this.#numberOfMines;
+    while(minesNumber) {
+      const cellIndex = Math.floor(Math.random() * (this.#numberOfRows * this.#numbersOfCols));
+      
+      this.#gameCells.flat().forEach((cell, index) => {
+        if(index === cellIndex && !cell.hasMine) {
+          cell.hasMine = true;
+          minesNumber--;
+        }
+      })
     }
   }
 
@@ -81,7 +100,25 @@ class Game extends UI {
     const rowIndex = Number(target.getAttribute('data-y'));
     const colIndex = Number(target.getAttribute('data-x'));
 
-    this.#gameCells[colIndex][rowIndex].revealCell();
+    const cell = this.#gameCells[colIndex][rowIndex];
+    
+    this.revealMine(cell);
+    cell.revealCell();
+  }
+
+  revealMine = cell => {
+    if(cell.hasMine) {
+      this.#gameCells.flat().forEach(cell => {
+        cell.element.removeEventListener('click', this.handleLeftClick);
+        cell.element.removeEventListener('contextmenu', this.handleRightClick);
+
+        if(cell.hasMine) {
+          timer.stopTimer();
+          cell.element.classList.add('border--revealed');
+          cell.element.classList.add('cell--is-mine');
+        }
+      })
+    }
   }
 
   handleRightClick = e => {
@@ -90,21 +127,21 @@ class Game extends UI {
     const rowIndex = Number(target.getAttribute('data-y'));
     const colIndex = Number(target.getAttribute('data-x'));
 
-    this.#gameCells[colIndex][rowIndex].toggleFlag();
+    const cell = this.#gameCells[colIndex][rowIndex];
+
+    if(cell.isRevealed) return;
+
+    if(cell.isFlagged) {
+      this.#counter.incrementValue();
+      cell.toggleFlag();
+      return;
+    }
+
+    if(!!this.#counter.value) {
+      this.#counter.decrementValue();
+      cell.toggleFlag();
+    }
   }
-
-  // addCellsEvents = () => {
-  //   this.#cellElements.forEach(element => {
-  //     console.log(element)
-  //     element.addEventListener('click', this.revealCell);
-  //     element.addEventListener('contextmenu', this.putFlagCell);
-  //   })
-  // }
-
-  // revealCell = e => {
-  //   const target = e.target;
-  //   console.log(target)
-  // }
 }
 
 window.onload = () => {

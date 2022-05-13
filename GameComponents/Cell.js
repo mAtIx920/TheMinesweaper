@@ -13,12 +13,13 @@ export class Cell extends UI{
     this.element = null;
   }
 
+  //Creates cell items
   createElement = () => {
     const element = `<div class="cell border border--concave" data-cell data-x="${this.x}" data-y="${this.y}"></div>`;
-
     return element;
   }
 
+  //Answering for revealing cells
   revealCell = () => {
     if(this.isFlagged) {
       return;
@@ -29,11 +30,8 @@ export class Cell extends UI{
     this.element.classList.add('border--revealed');
   }
 
+  //Answering for puting flag on cells
   toggleFlag = () => {
-    if(this.isRevealed) {
-      return;
-    }
-
     this.isFlagged = this.isFlagged ? false : true;
     this.element.classList.toggle('cell--is-flag');
   }

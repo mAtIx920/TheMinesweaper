@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "http-server",
+    "start": "http-server --port 5000",
     "format": "prettier --write"
   },
   "dependencies": {
