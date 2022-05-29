@@ -5,7 +5,7 @@ export class Cell extends UI{
     super();
     this.x = x;
     this.y = y;
-    this.value = 0;
+    this.value = null;
     this.hasMine = false;
     this.isRevealed = false;
     this.isFlagged = false;
@@ -28,6 +28,15 @@ export class Cell extends UI{
     this.isRevealed = true;
     this.element.classList.remove('border--concave');
     this.element.classList.add('border--revealed');
+
+    if(this.hasMine) {
+      return;
+    }
+    
+    if(this.value) {
+      this.element.textContent = this.value;
+      this.element.classList.add(`cell-info-${this.value}`)
+    }
   }
 
   //Answering for puting flag on cells

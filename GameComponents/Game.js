@@ -21,6 +21,7 @@ class Game extends UI {
       mines: 99
     }
   }
+  #isGameFinished = false;
   #numberOfRows = null;
   #numbersOfCols = null;
   #numberOfMines = null;
@@ -103,17 +104,20 @@ class Game extends UI {
     const cell = this.#gameCells[colIndex][rowIndex];
     
     this.revealMine(cell);
-    cell.revealCell();
+    this.createCellValue(cell);
   }
 
+  //Function which answering for revealing bombs
   revealMine = cell => {
     if(cell.hasMine) {
+      this.#isGameFinished = true;
+      timer.stopTimer();
       this.#gameCells.flat().forEach(cell => {
         cell.element.removeEventListener('click', this.handleLeftClick);
         cell.element.removeEventListener('contextmenu', this.handleRightClick);
 
         if(cell.hasMine) {
-          timer.stopTimer();
+         
           cell.element.classList.add('border--revealed');
           cell.element.classList.add('cell--is-mine');
         }
@@ -142,6 +146,241 @@ class Game extends UI {
       cell.toggleFlag();
     }
   }
+
+  createCellValue = cell => {
+    let value = 0;
+   
+    for (
+      let rowIndex = Math.max(cell.x - 1, 0);
+      rowIndex <= Math.min(cell.x + 1, this.#numberOfRows - 1);
+      rowIndex++
+    ) {
+      for (
+        let colIndex = Math.max(cell.y - 1, 0);
+        colIndex <= Math.min(cell.y + 1, this.#numbersOfCols - 1);
+        colIndex++
+      ) {  
+        if(this.#gameCells[rowIndex][colIndex].hasMine) {
+          value++; 
+        }
+      }
+    }
+
+    cell.value = value;
+    cell.revealCell();
+    
+    if(!cell.value) {
+      for (
+        let rowIndex = Math.max(cell.x - 1, 0);
+        rowIndex <= Math.min(cell.x + 1, this.#numberOfRows - 1);
+        rowIndex++
+      ) {
+        for (
+          let colIndex = Math.max(cell.y - 1, 0);
+          colIndex <= Math.min(cell.y + 1, this.#numbersOfCols - 1);
+          colIndex++
+        ) { 
+          const cell =  this.#gameCells[rowIndex][colIndex]; 
+          if(!cell.isRevealed) {
+            this.createCellValue(cell);
+          }
+        }
+      }
+    }
+  }
+
+  // createCellValue = () => {
+  //   const colsNumber = this.#numbersOfCols;
+  //   const rowsNumber = this.#numberOfRows;
+  //   let value = null;
+
+  //   this.#gameCells.flat().forEach((cell, index, board) => {
+  //     //Checking first row
+  //     if(index < colsNumber && !cell.hasMine) {
+  //       //Checking first cell in first row
+  //       if(index === 0) {
+  //         if(board[index + 1].hasMine) {
+  //           value++;
+  //         }
+  //         if(board[index + colsNumber].hasMine) {
+  //           value++;
+  //         }
+  //         if(board[index + colsNumber + 1].hasMine) {
+  //           value++;
+  //         }
+          
+  //         cell.value = value;
+  //         value = null
+  //       }
+  //       //Checking all cells in first row without first cell and last cell
+  //       if(index !== 0 && index !== colsNumber - 1) {
+  //         if(board[index - 1].hasMine) {
+  //           value++;
+  //         }
+  //         if(board[index + 1].hasMine) {
+  //           value++;
+  //         }
+  //         if(board[index + colsNumber - 1].hasMine) {
+  //           value++;
+  //         }
+  //         if(board[index + colsNumber].hasMine) {
+  //           value++;
+  //         }
+  //         if(board[index + colsNumber + 1].hasMine) {
+  //           value++;
+  //         }
+
+  //         cell.value = value;
+  //         value = null;
+  //       }
+  //       //Checking last cell in first row
+  //       if(index === colsNumber - 1) {
+  //         if(board[index - 1].hasMine) {
+  //           value++;
+  //         }
+  //         if(board[index + colsNumber - 1].hasMine) {
+  //           value++;
+  //         }
+  //         if(board[index + colsNumber].hasMine) {
+  //           value++;
+  //         }
+
+  //         cell.value = value;
+  //         value = null;
+  //       }
+  //     }
+
+  //     //Checking all rows without first row and last row
+  //     if(index > colsNumber - 1 && index < (colsNumber * (rowsNumber - 1)) && !cell.hasMine) {
+  //       //Checking cells by the left edge of each row without first row and last row
+  //       if(index % colsNumber === 0) {
+  //         if(board[index - colsNumber].hasMine) {
+  //           value++;
+  //         }
+  //         if(board[index - colsNumber + 1].hasMine) {
+  //           value++;
+  //         }
+  //         if(board[index + 1].hasMine) {
+  //           value++;
+  //         }
+  //         if(board[index + colsNumber].hasMine) {
+  //           value++;
+  //         }
+  //         if(board[index + colsNumber + 1].hasMine) {
+  //           value++;
+  //         }
+
+  //         cell.value = value;
+  //         value = null;
+  //       }
+  //       //Checking all cells without first cell and last cell in rows without first row and last row
+  //       if(index % colsNumber !== 0 && index % colsNumber !== colsNumber - 1) {
+  //         if(board[index - colsNumber - 1].hasMine){
+  //           value++;
+  //         }
+  //         if(board[index - colsNumber].hasMine){
+  //           value++;
+  //         }
+  //         if(board[index - colsNumber + 1].hasMine){
+  //           value++;
+  //         }
+  //         if(board[index - 1].hasMine){
+  //           value++;
+  //         }
+  //         if(board[index + 1].hasMine){
+  //           value++;
+  //         }
+  //         if(board[index + colsNumber - 1].hasMine){
+  //           value++;
+  //         }
+  //         if(board[index + colsNumber].hasMine){
+  //           value++;
+  //         }
+  //         if(board[index + colsNumber + 1].hasMine){
+  //           value++;
+  //         }
+
+  //         cell.value = value;
+  //         value = null;
+  //       }
+  //       //Checking cells by the right edge of each row without first row and last row
+  //       if(index % colsNumber === colsNumber - 1) {
+  //         if(board[index - colsNumber].hasMine) {
+  //           value++;;
+  //         }
+  //         if(board[index - 1].hasMine) {
+  //           value++;;
+  //         }
+  //         if(board[index + colsNumber - 1].hasMine) {
+  //           value++;;
+  //         }
+  //         if(board[index + colsNumber].hasMine) {
+  //           value++;;
+  //         }
+
+  //         cell.value = value;
+  //         value = null;
+  //       }
+  //     }
+
+  //     //Checking last row
+  //     if(index > (colsNumber * (rowsNumber - 1) - 1) && !cell.hasMine) {
+  //       //Checking first cell in last row
+  //       if(index === (colsNumber * (rowsNumber - 1))) {
+  //         if(board[index - colsNumber].hasMine) {
+  //           value++;
+  //         }
+  //         if(board[index - colsNumber + 1].hasMine) {
+  //           value++;
+  //         }
+  //         if(board[index + 1].hasMine) {
+  //           value++;
+  //         }
+          
+  //         cell.value = value;
+  //         value = null;
+  //       }
+  //       //Checking all cells in last row without first cell and last cell
+  //       if(index !== (colsNumber * (rowsNumber - 1)) && index !== (colsNumber * rowsNumber) - 1) {
+  //         if(board[index - colsNumber - 1].hasMine) {
+  //           value++;
+  //         }
+  //         if(board[index - colsNumber].hasMine) {
+  //           value++;
+  //         }
+  //         if(board[index - colsNumber + 1].hasMine) {
+  //           value++;
+  //         }
+  //         if(board[index - 1].hasMine) {
+  //           value++;
+  //         }
+  //         if(board[index + 1].hasMine) {
+  //           value++;
+  //         }
+
+  //         cell.value = value;
+  //         value = null;
+  //       }
+  //       //Checking las cell in last row
+  //       if(index === (colsNumber * rowsNumber - 1)) {
+  //         if(board[index - colsNumber - 1].hasMine) {
+  //           value++;
+  //         }
+  //         if(board[index - colsNumber].hasMine) {
+  //           value++;
+  //         }
+  //         if(board[index - 1].hasMine) {
+  //           value++;
+  //         }
+
+  //         cell.value = value;
+  //         value = null
+  //       }
+  //     }
+
+  //     // cell.element.textContent = cell.value;
+  //   })
+  // }
 }
 
 window.onload = () => {
