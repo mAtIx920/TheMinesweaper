@@ -88,6 +88,10 @@ html {
   background-color: var(--primary-color);
 }
 
+.header__reset:hover {
+  background-color: #ccc;
+}
+
 .header__button {
   width: 4.8rem;
   height: 4.8rem;

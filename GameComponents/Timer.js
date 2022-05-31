@@ -1,4 +1,5 @@
-import { UI } from "./UI.js";
+import { UI } from './UI.js';
+import { buttons } from './Buttons.js';
 
 class Timer extends UI {
   constructor() {
@@ -9,6 +10,7 @@ class Timer extends UI {
   #element = null;
   #numberOfSeconds = 0;
   #maxNumberOfSeconds = 999;
+  #endTime = false;
 
   #init = () => {
     this.#element = this.getElement(this.uiSelectors.timer);
@@ -23,14 +25,26 @@ class Timer extends UI {
     clearInterval(this.id);
   }
 
+  restartTimer = () => {
+    this.stopTimer()
+    this.#numberOfSeconds = 0;
+    this.#endTime =  false;
+  }
+
   #updateTimer = () => {
     if(this.#numberOfSeconds >= this.#maxNumberOfSeconds) {
       this.stopTimer();
+      buttons.resetButton.querySelector('use').setAttribute('href', './assets/sprite.svg#negative');
+      this.#endTime =  true;
       return;
     }
 
     this.#numberOfSeconds++;
     this.#element.textContent = this.#numberOfSeconds;
+  }
+
+  get finishedTime() {
+    return this.#endTime;
   }
 }
 

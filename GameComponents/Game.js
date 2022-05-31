@@ -2,6 +2,7 @@ import { Cell } from "./Cell.js";
 import { UI } from "./UI.js";
 import { Counter } from './Counter.js';
 import { timer } from "./Timer.js";
+import { buttons } from "./Buttons.js";
 
 class Game extends UI {
   #config = {
@@ -22,6 +23,7 @@ class Game extends UI {
     }
   }
   #isGameFinished = false;
+  #isgameWon = null;
   #numberOfRows = null;
   #numbersOfCols = null;
   #numberOfMines = null;
@@ -38,13 +40,14 @@ class Game extends UI {
   //Get layout elements
   handleElements = () => {
     this.#boardElement = this.getElement(this.uiSelectors.board);
+    this.initializeButtonsListeners();
   }
 
   //Create new game layout
   newGame = (
-    rows = this.#config.easy.rows,
-    cols = this.#config.easy.cols,
-    mines = this.#config.easy.mines
+    rows = this.#config.medium.rows,
+    cols = this.#config.medium.cols,
+    mines = this.#config.medium.mines
   ) => {
     this.#numberOfRows = rows;
     this.#numbersOfCols = cols;
@@ -52,6 +55,7 @@ class Game extends UI {
     this.#counter.setValue(mines);
 
     this.setStyles();
+    this.changeEmotions('neutral') 
     this.generateCells();
     this.renderBoard();
     this.createMines();
@@ -65,12 +69,14 @@ class Game extends UI {
 
   //Create cells of the game
   generateCells = () => {
+    this.#gameCells.length = 0
     for(let row = 0; row < this.#numberOfRows; row++) {
       this.#gameCells[row] = [];
       for(let col = 0; col < this.#numbersOfCols; col++) {
         this.#gameCells[row].push(new Cell(row, col))
       }
     }
+   
   }
 
   createMines = () => {
@@ -88,6 +94,10 @@ class Game extends UI {
   }
 
   renderBoard = () => {
+    while(this.#boardElement.firstChild) {
+      this.#boardElement.removeChild(this.#boardElement.lastChild)
+    }
+
     this.#gameCells.flat().forEach(cell => {
       this.#boardElement.insertAdjacentHTML('beforeend', cell.createElement());
       cell.element = cell.getElement(cell.selector);
@@ -96,7 +106,16 @@ class Game extends UI {
     })
   }
 
+  initializeButtonsListeners = () => {
+    buttons.resetButton.addEventListener('click', () => this.gameReset());
+    buttons.easyButton.addEventListener('click', () => this.startEasyLevel());
+    buttons.normalButton.addEventListener('click', () => this.startNormalLevel());
+    buttons.expertButton.addEventListener('click', () => this.startExpertLevel());
+  }
+
   handleLeftClick = e => {
+    if(this.#isGameFinished || timer.finishedTime) return;
+
     const target = e.target;
     const rowIndex = Number(target.getAttribute('data-y'));
     const colIndex = Number(target.getAttribute('data-x'));
@@ -109,24 +128,26 @@ class Game extends UI {
 
   //Function which answering for revealing bombs
   revealMine = cell => {
-    if(cell.hasMine) {
+    if(cell.hasMine && !cell.isFlagged) {
       this.#isGameFinished = true;
-      timer.stopTimer();
-      this.#gameCells.flat().forEach(cell => {
-        cell.element.removeEventListener('click', this.handleLeftClick);
-        cell.element.removeEventListener('contextmenu', this.handleRightClick);
+      this.#isgameWon =  false;
 
+      this.#gameCells.flat().forEach(cell => {
         if(cell.hasMine) {
          
           cell.element.classList.add('border--revealed');
           cell.element.classList.add('cell--is-mine');
         }
       })
+
+      this.checkEndGame();
     }
   }
 
   handleRightClick = e => {
     e.preventDefault();
+    if(this.#isGameFinished || timer.finishedTime) return;
+
     const target = e.target;
     const rowIndex = Number(target.getAttribute('data-y'));
     const colIndex = Number(target.getAttribute('data-x'));
@@ -144,6 +165,17 @@ class Game extends UI {
     if(!!this.#counter.value) {
       this.#counter.decrementValue();
       cell.toggleFlag();
+    }
+
+    if(!this.#counter.value) {
+      const selectedAmount = this.#gameCells.flat().filter(cell => cell.isFlagged && cell.hasMine).length;
+
+      if(selectedAmount === this.#numberOfMines) {
+        this.#isgameWon = true;
+        this.#isGameFinished = true;
+
+        this.checkEndGame();
+      }
     }
   }
 
@@ -381,6 +413,50 @@ class Game extends UI {
   //     // cell.element.textContent = cell.value;
   //   })
   // }
+
+  checkEndGame = () => {
+    timer.stopTimer();
+
+    if(this.#isGameFinished) {
+      if(!this.#isgameWon) {
+        this.changeEmotions('negative');
+      } else {
+        this.changeEmotions('positive');
+      }
+    } 
+  }
+
+  changeEmotions = emotion => {
+    const use = buttons.resetButton.querySelector('use');
+    use.setAttribute('href', `./assets/sprite.svg#${emotion}`)
+  }
+
+  gameReset = () => {
+    timer.restartTimer();
+    this.#isGameFinished = false;
+    this.#isgameWon = null;
+    this.newGame(this.#numberOfRows, this.#numbersOfCols, this.#numberOfMines);
+  }
+
+  startEasyLevel = () => {
+    timer.restartTimer();
+    this.#isGameFinished = false;
+    this.#isgameWon = null;
+    this.newGame(this.#config.easy.rows, this.#config.easy.cols, this.#config.easy.mines);
+  }
+  startNormalLevel = () => {
+    timer.restartTimer();
+    this.#isGameFinished = false;
+    this.#isgameWon = null;
+    this.newGame(this.#config.medium.rows, this.#config.medium.cols, this.#config.medium.mines);
+  }
+  
+  startExpertLevel = () => {
+    timer.restartTimer();
+    this.#isGameFinished = false;
+    this.#isgameWon = null;
+    this.newGame(this.#config.expert.rows, this.#config.expert.cols, this.#config.expert.mines);
+  }
 }
 
 window.onload = () => {
