@@ -3,6 +3,7 @@ import { UI } from "./UI.js";
 import { Counter } from './Counter.js';
 import { timer } from "./Timer.js";
 import { buttons } from "./Buttons.js";
+import { modal } from './Modal.js';
 
 class Game extends UI {
   #config = {
@@ -45,9 +46,9 @@ class Game extends UI {
 
   //Create new game layout
   newGame = (
-    rows = this.#config.medium.rows,
-    cols = this.#config.medium.cols,
-    mines = this.#config.medium.mines
+    rows = this.#config.easy.rows,
+    cols = this.#config.easy.cols,
+    mines = this.#config.easy.mines
   ) => {
     this.#numberOfRows = rows;
     this.#numbersOfCols = cols;
@@ -111,6 +112,7 @@ class Game extends UI {
     buttons.easyButton.addEventListener('click', () => this.startEasyLevel());
     buttons.normalButton.addEventListener('click', () => this.startNormalLevel());
     buttons.expertButton.addEventListener('click', () => this.startExpertLevel());
+    modal.modalButton.addEventListener('click', () => this.playAgain());
   }
 
   handleLeftClick = e => {
@@ -420,10 +422,14 @@ class Game extends UI {
     if(this.#isGameFinished) {
       if(!this.#isgameWon) {
         this.changeEmotions('negative');
+        modal.modalElement.querySelector('h2').textContent = 'You lose';
       } else {
         this.changeEmotions('positive');
+        modal.modalElement.querySelector('h2').textContent = 'You win';
       }
-    } 
+
+      modal.modalElement.classList.remove('hide');
+    }
   }
 
   changeEmotions = emotion => {
@@ -456,6 +462,14 @@ class Game extends UI {
     this.#isGameFinished = false;
     this.#isgameWon = null;
     this.newGame(this.#config.expert.rows, this.#config.expert.cols, this.#config.expert.mines);
+  }
+  
+  playAgain = () => {
+    timer.restartTimer();
+    this.#isGameFinished = false;
+    this.#isgameWon = null;
+    this.newGame(this.#numberOfRows, this.#numbersOfCols, this.#numberOfMines);
+    modal.modalElement.classList.add('hide');
   }
 }
 

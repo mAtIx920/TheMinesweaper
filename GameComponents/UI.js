@@ -7,7 +7,9 @@ export class UI {
     reset: '[data-reset]',
     easy: '[data-easy]',
     normal: '[data-normal]',
-    expert: '[data-expert]'
+    expert: '[data-expert]',
+    modal: '[data-modal]',
+    modalButton: '[data-modalButton]'
   }
 
   getElement = selector => {

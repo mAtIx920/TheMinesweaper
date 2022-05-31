@@ -1,5 +1,6 @@
 import { UI } from './UI.js';
 import { buttons } from './Buttons.js';
+import { modal } from './Modal.js';
 
 class Timer extends UI {
   constructor() {
@@ -35,6 +36,8 @@ class Timer extends UI {
     if(this.#numberOfSeconds >= this.#maxNumberOfSeconds) {
       this.stopTimer();
       buttons.resetButton.querySelector('use').setAttribute('href', './assets/sprite.svg#negative');
+      modal.modalElement.querySelector('h2').textContent =  'You lose';
+      modal.modalElement.classList.remove('hide');
       this.#endTime =  true;
       return;
     }
