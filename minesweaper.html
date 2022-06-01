@@ -25,17 +25,45 @@
     <article class="game__panel">
       <header class="panel__header">
         <h1 class="panel__heading">Select difficulty</h1>
-        <section class="panel__buttons border border--convex">
-          <button class="button" data-easy>Easy</button>
-          <button class="button" data-normal>Normal</button>
-          <button class="button" data-expert>Expert</button>
-        </section>
+        <div class="border border--convex">
+          <section class="panel__buttons--one">
+            <button class="button" data-easy>Easy</button>
+            <button class="button" data-normal>Normal</button>
+            <button class="button" data-expert>Expert</button>
+          </section>
+          <section class="panel__buttons--two">
+            <button class="button" data-personal>Personal game</button>
+          </section>
+        </div>
       </header>
     </article>
     <article class="modal hide" data-modal>
       <section class="modal__content">
         <h2 class="modal__text">You won</h2>
         <button class="modal__button" data-modalButton>Play again</button>
+      </section>
+    </article>
+    <article class="modal hide" data-settingModal>
+      <section class="modal__content">
+        <h2 class="modal__text">Gra personalna</h2>
+        <div class="modal__personal-inputs">
+          <div class="input-contener">
+            <label>Wprowadź ilość wierszy</label>
+            <span>min:8 - max:16</span>
+            <input class="input-element" type="number" data-rows/>
+          </div>
+          <div class="input-contener">
+            <label>Wprowadź ilość kolumn</label>
+            <span>min:8 - max: 45</span>
+            <input class="input-element" type="number" data-cols/>
+          </div>
+          <div class="input-contener">
+            <label>Wprowadź ilość min</label>
+            <span>min:1 - max: <span data-minesSpan></span></span>
+            <input class="input-element" type="number" data-mines/>
+          </div>
+        </div>
+        <button class="modal__personal-button" data-settingModalButton>Rozpocznij</button>
       </section>
     </article>
   </main>

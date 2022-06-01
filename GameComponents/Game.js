@@ -31,6 +31,7 @@ class Game extends UI {
   #gameCells = [];
   #boardElement = null;
   #counter = new Counter();
+  #errorText =  false;
 
   initializeGame = () => {
     this.handleElements();
@@ -112,7 +113,9 @@ class Game extends UI {
     buttons.easyButton.addEventListener('click', () => this.startEasyLevel());
     buttons.normalButton.addEventListener('click', () => this.startNormalLevel());
     buttons.expertButton.addEventListener('click', () => this.startExpertLevel());
+    buttons.personalButton.addEventListener('click', () => this.startPersonalLevel());
     modal.modalButton.addEventListener('click', () => this.playAgain());
+    modal.settingButton.addEventListener('click', () => this.startPersonalGame());
   }
 
   handleLeftClick = e => {
@@ -462,6 +465,37 @@ class Game extends UI {
     this.#isGameFinished = false;
     this.#isgameWon = null;
     this.newGame(this.#config.expert.rows, this.#config.expert.cols, this.#config.expert.mines);
+  }
+
+  startPersonalLevel = () => {
+    modal.settingModal.classList.remove('hide');
+    modal.minesSpanElement.textContent = (this.#numberOfRows * this.#numbersOfCols - 1)
+  }
+  
+  startPersonalGame = () => {
+    const amountRows = Number(modal.rowsInputElement.value);
+    const amountCols = Number(modal.colsInputElement.value);
+    const amountMines = Number(modal.minesInputElement.value);
+
+    if(amountRows < 8 || amountCols < 8 || amountRows > 16 || amountCols > 45 || amountMines < 1 || amountMines > modal.getmaxMinesValue()) {
+      if(!this.#errorText) {
+        modal.settingButton.insertAdjacentHTML('beforebegin', '<p class="error">Wpisz prawidłowe dane!</p>');
+        this.#errorText =  true;
+      }
+
+      return;
+    }
+
+    if(this.#errorText) {
+      document.querySelector('.error').remove();
+    }
+    
+    timer.restartTimer();
+    this.#isGameFinished = false;
+    this.#isgameWon = null;
+    this.#errorText =  false;
+    this.newGame(amountRows, amountCols, amountMines);
+    modal.settingModal.classList.add('hide');
   }
   
   playAgain = () => {

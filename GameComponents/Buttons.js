@@ -11,6 +11,7 @@ class Buttons extends UI {
     this.easyButton = this.getElement(this.uiSelectors.easy);
     this.normalButton = this.getElement(this.uiSelectors.normal);
     this.expertButton = this.getElement(this.uiSelectors.expert);
+    this.personalButton = this.getElement(this.uiSelectors.personal);
   }
 }
 

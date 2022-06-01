@@ -8,8 +8,15 @@ export class UI {
     easy: '[data-easy]',
     normal: '[data-normal]',
     expert: '[data-expert]',
+    personal: '[data-personal]',
+    settingModal: '[data-settingModal]',
+    settingButton: '[data-settingModalButton]',
     modal: '[data-modal]',
-    modalButton: '[data-modalButton]'
+    modalButton: '[data-modalButton]',
+    rowsInput: '[data-rows]',
+    colsInput: '[data-cols]',
+    minesInput: '[data-mines]',
+    minesSpan: '[data-minesSpan]'
   }
 
   getElement = selector => {
