@@ -1,0 +1,16 @@
+{
+  "records": [
+    {
+      "timeRecord": null,
+      "id": "easy"
+    },
+    {
+      "timeRecord": null,
+      "id": "medium"
+    },
+    {
+      "timeRecord": null,
+      "id": "expert"
+    }
+  ]
+}
