@@ -137,8 +137,8 @@ html {
   background-color: rgba(0, 0, 0, 0.8);
 }
 .modal__content {
-  width: 50vw;
-  height: 40vh;
+  width: 40vw;
+  height: 45vh;
   background-color: #fff;
   display: flex;
   flex-direction: column;
@@ -209,6 +209,26 @@ label {
   align-items: center;
   transition: background-color 0.1s ease-in, color 0.1s ease-in,
     border-color 0.1s ease-in;
+}
+
+.userRecords {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+
+.userRecords div {
+  font-size: 15px;
+  text-align: center;
+}
+
+.userRecords div p {
+  letter-spacing: 1px;
+}
+
+.userRecords div span {
+  font-size: 15px;
+  font-weight: bold;
 }
 
 .modal__personal-button:hover {

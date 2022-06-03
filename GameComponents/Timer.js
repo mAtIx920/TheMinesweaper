@@ -49,6 +49,10 @@ class Timer extends UI {
   get finishedTime() {
     return this.#endTime;
   }
+
+  get getCurrentTime() {
+    return this.#numberOfSeconds;
+  }
 }
 
 export const timer = new Timer();

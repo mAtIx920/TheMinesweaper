@@ -4,6 +4,7 @@ import { Counter } from './Counter.js';
 import { timer } from "./Timer.js";
 import { buttons } from "./Buttons.js";
 import { modal } from './Modal.js';
+import { savingRecordTime } from './contextFunction.js';
 
 class Game extends UI {
   #config = {
@@ -32,6 +33,8 @@ class Game extends UI {
   #boardElement = null;
   #counter = new Counter();
   #errorText =  false;
+  #currentLevel = 'easy';
+  #interval =  null
 
   initializeGame = () => {
     this.handleElements();
@@ -49,12 +52,14 @@ class Game extends UI {
   newGame = (
     rows = this.#config.easy.rows,
     cols = this.#config.easy.cols,
-    mines = this.#config.easy.mines
+    mines = this.#config.easy.mines,
+    lvl = this.#currentLevel
   ) => {
     this.#numberOfRows = rows;
     this.#numbersOfCols = cols;
     this.#numberOfMines = mines;
     this.#counter.setValue(mines);
+    this.#currentLevel = lvl
 
     this.setStyles();
     this.changeEmotions('neutral') 
@@ -63,6 +68,7 @@ class Game extends UI {
     this.createMines();
 
     timer.startTimer();
+    this.typeRecord()
   }
 
   setStyles = () => {
@@ -126,7 +132,7 @@ class Game extends UI {
     const colIndex = Number(target.getAttribute('data-x'));
 
     const cell = this.#gameCells[colIndex][rowIndex];
-    
+
     this.revealMine(cell);
     this.createCellValue(cell);
   }
@@ -421,6 +427,7 @@ class Game extends UI {
 
   checkEndGame = () => {
     timer.stopTimer();
+    let value = null;
 
     if(this.#isGameFinished) {
       if(!this.#isgameWon) {
@@ -428,11 +435,23 @@ class Game extends UI {
         modal.modalElement.querySelector('h2').textContent = 'You lose';
       } else {
         this.changeEmotions('positive');
-        modal.modalElement.querySelector('h2').textContent = 'You win';
-      }
+        modal.modalElement.querySelector('h2').textContent = 'You won';
+
+        value = savingRecordTime(timer.getCurrentTime, this.#currentLevel);
+        setTimeout(this.typeRecord, 400)
+      } 
 
       modal.modalElement.classList.remove('hide');
     }
+  }
+
+  typeRecord = async () => {
+    const response = await fetch(`http://localhost:3000/records`);
+    const data = await response.json();
+
+    modal.easySpan.textContent = data[0].timeRecord !== null ? `${data[0].timeRecord}s` : 'Brak rekordu';
+    modal.mediumSpan.textContent = data[1].timeRecord !== null ? `${data[1].timeRecord}s` : 'Brak rekordu';
+    modal.expertSpan.textContent = data[2].timeRecord !== null ? `${data[2].timeRecord}s` : 'Brak rekordu';
   }
 
   changeEmotions = emotion => {
@@ -452,12 +471,15 @@ class Game extends UI {
     this.#isGameFinished = false;
     this.#isgameWon = null;
     this.newGame(this.#config.easy.rows, this.#config.easy.cols, this.#config.easy.mines);
+    this.#currentLevel = buttons.easyButton.textContent;
   }
+
   startNormalLevel = () => {
     timer.restartTimer();
     this.#isGameFinished = false;
     this.#isgameWon = null;
     this.newGame(this.#config.medium.rows, this.#config.medium.cols, this.#config.medium.mines);
+    this.#currentLevel = buttons.normalButton.textContent;
   }
   
   startExpertLevel = () => {
@@ -465,6 +487,7 @@ class Game extends UI {
     this.#isGameFinished = false;
     this.#isgameWon = null;
     this.newGame(this.#config.expert.rows, this.#config.expert.cols, this.#config.expert.mines);
+    this.#currentLevel = buttons.expertButton.textContent;
   }
 
   startPersonalLevel = () => {
@@ -503,6 +526,7 @@ class Game extends UI {
     this.#isGameFinished = false;
     this.#isgameWon = null;
     this.newGame(this.#numberOfRows, this.#numbersOfCols, this.#numberOfMines);
+    this.#currentLevel = this.#currentLevel
     modal.modalElement.classList.add('hide');
   }
 }

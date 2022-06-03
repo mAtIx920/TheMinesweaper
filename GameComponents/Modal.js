@@ -19,6 +19,9 @@ class Modal extends UI {
     this.colsInputElement = this.getElement(this.uiSelectors.colsInput);
     this.minesInputElement = this.getElement(this.uiSelectors.minesInput);
     this.minesSpanElement = this.getElement(this.uiSelectors.minesSpan);
+    this.easySpan = this.getElement(this.uiSelectors.easyRecord);
+    this.mediumSpan = this.getElement(this.uiSelectors.mediumRecord);
+    this.expertSpan = this.getElement(this.uiSelectors.expertRecord);
   }
   
   addInputEvents = () => {

@@ -16,7 +16,10 @@ export class UI {
     rowsInput: '[data-rows]',
     colsInput: '[data-cols]',
     minesInput: '[data-mines]',
-    minesSpan: '[data-minesSpan]'
+    minesSpan: '[data-minesSpan]',
+    easyRecord: '[data-easyRecord]',
+    mediumRecord: '[data-mediumRecord]',
+    expertRecord: '[data-expertRecord]'
   }
 
   getElement = selector => {
