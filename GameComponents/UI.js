@@ -19,7 +19,8 @@ export class UI {
     minesSpan: '[data-minesSpan]',
     easyRecord: '[data-easyRecord]',
     mediumRecord: '[data-mediumRecord]',
-    expertRecord: '[data-expertRecord]'
+    expertRecord: '[data-expertRecord]',
+    exitButton: '[data-exit]'
   }
 
   getElement = selector => {

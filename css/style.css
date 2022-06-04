@@ -137,6 +137,7 @@ html {
   background-color: rgba(0, 0, 0, 0.8);
 }
 .modal__content {
+  position: relative;
   width: 40vw;
   height: 45vh;
   background-color: #fff;
@@ -146,9 +147,23 @@ html {
   justify-content: space-around;
 }
 
+.modal__content .exit {
+  position: absolute;
+  top: -1%;
+  left: -1%;
+  width: 30px;
+  height: 30px;
+  background-color: #fff;
+  border: 2px solid black;
+  border-radius: 20px;
+  cursor: pointer;
+  background-image: url('../assets/exit.svg');
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
 .modal__personal-inputs {
   display: flex;
-  /* flex-direction: column; */
   justify-content: space-around;
   flex-basis: 50%;
 }

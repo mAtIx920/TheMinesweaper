@@ -34,7 +34,7 @@ class Game extends UI {
   #counter = new Counter();
   #errorText =  false;
   #currentLevel = 'easy';
-  #interval =  null
+
 
   initializeGame = () => {
     this.handleElements();
@@ -122,6 +122,7 @@ class Game extends UI {
     buttons.personalButton.addEventListener('click', () => this.startPersonalLevel());
     modal.modalButton.addEventListener('click', () => this.playAgain());
     modal.settingButton.addEventListener('click', () => this.startPersonalGame());
+    modal.exitButton.addEventListener('click', () => this.exitModal());
   }
 
   handleLeftClick = e => {
@@ -527,6 +528,11 @@ class Game extends UI {
     this.#isgameWon = null;
     this.newGame(this.#numberOfRows, this.#numbersOfCols, this.#numberOfMines);
     this.#currentLevel = this.#currentLevel
+    modal.modalElement.classList.add('hide');
+  }
+
+  exitModal = () => {
+    console.log('j')
     modal.modalElement.classList.add('hide');
   }
 }
