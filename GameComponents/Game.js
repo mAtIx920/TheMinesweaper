@@ -24,17 +24,20 @@ class Game extends UI {
       mines: 99
     }
   }
-  #isGameFinished = false;
-  #isgameWon = null;
+
   #numberOfRows = null;
   #numbersOfCols = null;
   #numberOfMines = null;
+  #currentLevel = 'easy'; //primary level of the game
+
   #gameCells = [];
   #boardElement = null;
-  #counter = new Counter();
-  #errorText =  false;
-  #currentLevel = 'easy';
 
+  #isGameFinished = false;
+  #isgameWon = null;
+  #errorText =  false;
+
+  #counter = new Counter();
 
   initializeGame = () => {
     this.handleElements();
@@ -42,13 +45,12 @@ class Game extends UI {
     this.newGame();
   }
 
-  //Get layout elements
+  //Geting layout elements
   handleElements = () => {
     this.#boardElement = this.getElement(this.uiSelectors.board);
     this.initializeButtonsListeners();
   }
 
-  //Create new game layout
   newGame = (
     rows = this.#config.easy.rows,
     cols = this.#config.easy.cols,
@@ -71,11 +73,12 @@ class Game extends UI {
     this.typeRecord()
   }
 
+  //Setting some styles of components 
   setStyles = () => {
     document.documentElement.style.setProperty('--cells-in-row', this.#numbersOfCols);
   }
 
-  //Create cells of the game
+  //Creating cells on board
   generateCells = () => {
     this.#gameCells.length = 0
     for(let row = 0; row < this.#numberOfRows; row++) {
@@ -87,6 +90,7 @@ class Game extends UI {
    
   }
 
+  //Creating mines on board
   createMines = () => {
     let minesNumber = this.#numberOfMines;
     while(minesNumber) {
@@ -101,6 +105,7 @@ class Game extends UI {
     }
   }
 
+  //Display the prepared board on screen
   renderBoard = () => {
     while(this.#boardElement.firstChild) {
       this.#boardElement.removeChild(this.#boardElement.lastChild)
@@ -114,6 +119,7 @@ class Game extends UI {
     })
   }
 
+  //Added listener functions some components
   initializeButtonsListeners = () => {
     buttons.resetButton.addEventListener('click', () => this.gameReset());
     buttons.easyButton.addEventListener('click', () => this.startEasyLevel());
@@ -125,6 +131,7 @@ class Game extends UI {
     modal.exitButton.addEventListener('click', () => this.exitModal());
   }
 
+  //Function answering for clicking left button of computer mouse 
   handleLeftClick = e => {
     if(this.#isGameFinished || timer.finishedTime) return;
 
@@ -138,7 +145,7 @@ class Game extends UI {
     this.createCellValue(cell);
   }
 
-  //Function which answering for revealing bombs
+  //Function answering for revealing all bombs after click on first bomb
   revealMine = cell => {
     if(cell.hasMine && !cell.isFlagged) {
       this.#isGameFinished = true;
@@ -156,6 +163,7 @@ class Game extends UI {
     }
   }
 
+  //Function answering for clicking right button of computer mouse
   handleRightClick = e => {
     e.preventDefault();
     if(this.#isGameFinished || timer.finishedTime) return;
@@ -179,6 +187,7 @@ class Game extends UI {
       cell.toggleFlag();
     }
 
+    //Checking if player put all flags on cells where are bombs
     if(!this.#counter.value) {
       const selectedAmount = this.#gameCells.flat().filter(cell => cell.isFlagged && cell.hasMine).length;
 
@@ -191,6 +200,7 @@ class Game extends UI {
     }
   }
 
+  //Creating number value of bombs being around the cell
   createCellValue = cell => {
     let value = 0;
    
@@ -233,6 +243,127 @@ class Game extends UI {
     }
   }
 
+  //Function answering for checking if game is won or lose
+  checkEndGame = () => {
+    timer.stopTimer();
+    let value = null;
+
+    if(this.#isGameFinished) {
+      if(!this.#isgameWon) {
+        this.changeEmotions('negative');
+        modal.modalElement.querySelector('h2').textContent = 'You lose';
+      } else {
+        this.changeEmotions('positive');
+        modal.modalElement.querySelector('h2').textContent = 'You won';
+
+        //Save record of player
+        value = savingRecordTime(timer.getCurrentTime, this.#currentLevel);
+        setTimeout(this.typeRecord, 400)
+      } 
+
+      modal.modalElement.classList.remove('hide');
+    }
+  }
+
+  //Writing records of player on the screen
+  typeRecord = async () => {
+    const response = await fetch(`http://localhost:3000/records`);
+    const data = await response.json();
+
+    modal.easySpan.textContent = data[0].timeRecord !== null ? `${data[0].timeRecord}s` : 'Brak rekordu';
+    modal.mediumSpan.textContent = data[1].timeRecord !== null ? `${data[1].timeRecord}s` : 'Brak rekordu';
+    modal.expertSpan.textContent = data[2].timeRecord !== null ? `${data[2].timeRecord}s` : 'Brak rekordu';
+  }
+
+  //Change image depending on winning or defeat
+  changeEmotions = emotion => {
+    const use = buttons.resetButton.querySelector('use');
+    use.setAttribute('href', `./assets/sprite.svg#${emotion}`)
+  }
+
+  //Reset game
+  gameReset = () => {
+    timer.restartTimer();
+    this.#isGameFinished = false;
+    this.#isgameWon = null;
+    this.newGame(this.#numberOfRows, this.#numbersOfCols, this.#numberOfMines);
+  }
+
+  //Buttons of levels 'easy, medium, expert, personal'
+  startEasyLevel = () => {
+    timer.restartTimer();
+    this.#isGameFinished = false;
+    this.#isgameWon = null;
+    this.newGame(this.#config.easy.rows, this.#config.easy.cols, this.#config.easy.mines);
+    this.#currentLevel = buttons.easyButton.textContent;
+  }
+
+  startNormalLevel = () => {
+    timer.restartTimer();
+    this.#isGameFinished = false;
+    this.#isgameWon = null;
+    this.newGame(this.#config.medium.rows, this.#config.medium.cols, this.#config.medium.mines);
+    this.#currentLevel = buttons.normalButton.textContent;
+  }
+  
+  startExpertLevel = () => {
+    timer.restartTimer();
+    this.#isGameFinished = false;
+    this.#isgameWon = null;
+    this.newGame(this.#config.expert.rows, this.#config.expert.cols, this.#config.expert.mines);
+    this.#currentLevel = buttons.expertButton.textContent;
+  }
+
+  startPersonalLevel = () => {
+    modal.settingModal.classList.remove('hide');
+    modal.minesSpanElement.textContent = (this.#numberOfRows * this.#numbersOfCols - 1)
+  }
+  
+
+  startPersonalGame = () => {
+    const amountRows = Number(modal.rowsInputElement.value);
+    const amountCols = Number(modal.colsInputElement.value);
+    const amountMines = Number(modal.minesInputElement.value);
+
+    //Checking if player has written right data
+    if(amountRows < 8 || amountCols < 8 || amountRows > 16 || amountCols > 45 || amountMines < 1 || amountMines > modal.getmaxMinesValue()) {
+      if(!this.#errorText) {
+        modal.settingButton.insertAdjacentHTML('beforebegin', '<p class="error">Wpisz prawidłowe dane!</p>');
+        this.#errorText =  true;
+      }
+
+      return;
+    }
+
+    if(this.#errorText) {
+      document.querySelector('.error').remove();
+    }
+    
+    timer.restartTimer();
+    this.#isGameFinished = false;
+    this.#isgameWon = null;
+    this.#errorText =  false;
+    this.newGame(amountRows, amountCols, amountMines);
+    modal.settingModal.classList.add('hide');
+  }
+  
+  //Buttons which launch the game again
+  playAgain = () => {
+    timer.restartTimer();
+    this.#isGameFinished = false;
+    this.#isgameWon = null;
+    this.newGame(this.#numberOfRows, this.#numbersOfCols, this.#numberOfMines);
+    this.#currentLevel = this.#currentLevel
+    modal.modalElement.classList.add('hide');
+  }
+
+  //Display exit modal on the screen
+  exitModal = () => {
+    console.log('j')
+    modal.modalElement.classList.add('hide');
+  }
+
+  //Makeshift function for creating cell value
   // createCellValue = () => {
   //   const colsNumber = this.#numbersOfCols;
   //   const rowsNumber = this.#numberOfRows;
@@ -425,116 +556,6 @@ class Game extends UI {
   //     // cell.element.textContent = cell.value;
   //   })
   // }
-
-  checkEndGame = () => {
-    timer.stopTimer();
-    let value = null;
-
-    if(this.#isGameFinished) {
-      if(!this.#isgameWon) {
-        this.changeEmotions('negative');
-        modal.modalElement.querySelector('h2').textContent = 'You lose';
-      } else {
-        this.changeEmotions('positive');
-        modal.modalElement.querySelector('h2').textContent = 'You won';
-
-        value = savingRecordTime(timer.getCurrentTime, this.#currentLevel);
-        setTimeout(this.typeRecord, 400)
-      } 
-
-      modal.modalElement.classList.remove('hide');
-    }
-  }
-
-  typeRecord = async () => {
-    const response = await fetch(`http://localhost:3000/records`);
-    const data = await response.json();
-
-    modal.easySpan.textContent = data[0].timeRecord !== null ? `${data[0].timeRecord}s` : 'Brak rekordu';
-    modal.mediumSpan.textContent = data[1].timeRecord !== null ? `${data[1].timeRecord}s` : 'Brak rekordu';
-    modal.expertSpan.textContent = data[2].timeRecord !== null ? `${data[2].timeRecord}s` : 'Brak rekordu';
-  }
-
-  changeEmotions = emotion => {
-    const use = buttons.resetButton.querySelector('use');
-    use.setAttribute('href', `./assets/sprite.svg#${emotion}`)
-  }
-
-  gameReset = () => {
-    timer.restartTimer();
-    this.#isGameFinished = false;
-    this.#isgameWon = null;
-    this.newGame(this.#numberOfRows, this.#numbersOfCols, this.#numberOfMines);
-  }
-
-  startEasyLevel = () => {
-    timer.restartTimer();
-    this.#isGameFinished = false;
-    this.#isgameWon = null;
-    this.newGame(this.#config.easy.rows, this.#config.easy.cols, this.#config.easy.mines);
-    this.#currentLevel = buttons.easyButton.textContent;
-  }
-
-  startNormalLevel = () => {
-    timer.restartTimer();
-    this.#isGameFinished = false;
-    this.#isgameWon = null;
-    this.newGame(this.#config.medium.rows, this.#config.medium.cols, this.#config.medium.mines);
-    this.#currentLevel = buttons.normalButton.textContent;
-  }
-  
-  startExpertLevel = () => {
-    timer.restartTimer();
-    this.#isGameFinished = false;
-    this.#isgameWon = null;
-    this.newGame(this.#config.expert.rows, this.#config.expert.cols, this.#config.expert.mines);
-    this.#currentLevel = buttons.expertButton.textContent;
-  }
-
-  startPersonalLevel = () => {
-    modal.settingModal.classList.remove('hide');
-    modal.minesSpanElement.textContent = (this.#numberOfRows * this.#numbersOfCols - 1)
-  }
-  
-  startPersonalGame = () => {
-    const amountRows = Number(modal.rowsInputElement.value);
-    const amountCols = Number(modal.colsInputElement.value);
-    const amountMines = Number(modal.minesInputElement.value);
-
-    if(amountRows < 8 || amountCols < 8 || amountRows > 16 || amountCols > 45 || amountMines < 1 || amountMines > modal.getmaxMinesValue()) {
-      if(!this.#errorText) {
-        modal.settingButton.insertAdjacentHTML('beforebegin', '<p class="error">Wpisz prawidłowe dane!</p>');
-        this.#errorText =  true;
-      }
-
-      return;
-    }
-
-    if(this.#errorText) {
-      document.querySelector('.error').remove();
-    }
-    
-    timer.restartTimer();
-    this.#isGameFinished = false;
-    this.#isgameWon = null;
-    this.#errorText =  false;
-    this.newGame(amountRows, amountCols, amountMines);
-    modal.settingModal.classList.add('hide');
-  }
-  
-  playAgain = () => {
-    timer.restartTimer();
-    this.#isGameFinished = false;
-    this.#isgameWon = null;
-    this.newGame(this.#numberOfRows, this.#numbersOfCols, this.#numberOfMines);
-    this.#currentLevel = this.#currentLevel
-    modal.modalElement.classList.add('hide');
-  }
-
-  exitModal = () => {
-    console.log('j')
-    modal.modalElement.classList.add('hide');
-  }
 }
 
 window.onload = () => {
