@@ -131,6 +131,14 @@ class Game extends UI {
     modal.exitButton.addEventListener('click', () => this.exitModal());
   }
 
+  //Function which remove the cell listeners
+  removeListeners = () => {
+    this.#gameCells.flat().forEach(cell => {
+      cell.element.removeEventListener('click', this.handleLeftClick);
+      cell.element.removeEventListener('contextmenu', this.handleRightClick);
+    })
+  }
+
   //Function answering for clicking left button of computer mouse 
   handleLeftClick = e => {
     if(this.#isGameFinished || timer.finishedTime) return;
@@ -246,7 +254,6 @@ class Game extends UI {
   //Function answering for checking if game is won or lose
   checkEndGame = () => {
     timer.stopTimer();
-    let value = null;
 
     if(this.#isGameFinished) {
       if(!this.#isgameWon) {
@@ -257,10 +264,11 @@ class Game extends UI {
         modal.modalElement.querySelector('h2').textContent = 'You won';
 
         //Save record of player
-        value = savingRecordTime(timer.getCurrentTime, this.#currentLevel);
+        savingRecordTime(timer.getCurrentTime, this.#currentLevel);
         setTimeout(this.typeRecord, 400)
       } 
 
+      this.removeListeners();
       modal.modalElement.classList.remove('hide');
     }
   }
@@ -363,7 +371,7 @@ class Game extends UI {
     modal.modalElement.classList.add('hide');
   }
 
-  //Makeshift function for creating cell value
+  //Makeshift function for creating cell
   // createCellValue = () => {
   //   const colsNumber = this.#numbersOfCols;
   //   const rowsNumber = this.#numberOfRows;

@@ -32,8 +32,6 @@ export const savingRecordTime = async (currentTime, currentLevel) => {
       break;
     }
   }
-
-  return 1
 }
 
 const sendtoDataBase = async (theBestTime, currentLevel) => {
